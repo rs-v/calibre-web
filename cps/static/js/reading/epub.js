@@ -17,6 +17,21 @@ var reader;
         reader.rendition.themes.register(theme, themes[theme].css_path);
     });
 
+    // Re-apply font override on each chapter/page navigation so epub-level
+    // font declarations on individual elements do not take precedence.
+    reader.rendition.hooks.content.register(function (contents) {
+        try {
+            var savedFont = localStorage.getItem("calibre.reader.font");
+            // Only allow known-safe font name characters to prevent CSS injection.
+            if (savedFont && savedFont !== "default" && /^[A-Za-z0-9 _-]+$/.test(savedFont)) {
+                contents.addStylesheetCss(
+                    "* { font-family: " + savedFont + " !important; }",
+                    "calibre-font-override"
+                );
+            }
+        } catch (e) {}
+    });
+
     if (calibre.useBookmarks) {
         reader.on("reader:bookmarked", updateBookmark.bind(reader, "add"));
         reader.on("reader:unbookmarked", updateBookmark.bind(reader, "remove"));

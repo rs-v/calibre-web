@@ -292,9 +292,20 @@
 
           if (id == "default") {
               reader.rendition.themes.font(defaultFont);
+              reader.rendition.getContents().forEach(function(c) {
+                  var node = c.document && c.document.getElementById("epubjs-inserted-css-calibre-font-override");
+                  if (node) node.remove();
+              });
               return;
           }
           reader.rendition.themes.font(id);
+          // Also apply to all child elements so epub-level font declarations are overridden.
+          // Only allow known safe font IDs to prevent CSS injection.
+          if (/^[A-Za-z0-9 _-]+$/.test(id)) {
+              reader.rendition.getContents().forEach(function(c) {
+                  c.addStylesheetCss("* { font-family: " + id + " !important; }", "calibre-font-override");
+              });
+          }
       };
 
         function spread(id) {
