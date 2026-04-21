@@ -24,8 +24,12 @@ var reader;
             var savedFont = localStorage.getItem("calibre.reader.font");
             // Only allow known-safe font name characters to prevent CSS injection.
             if (savedFont && savedFont !== "default" && /^[A-Za-z0-9 _-]+$/.test(savedFont)) {
-                // Look up the cross-platform font stack; fall back to the raw ID.
-                var fontStack = (window.FONT_STACKS && window.FONT_STACKS[savedFont]) || savedFont;
+                // Use the hardcoded cross-platform stack when available (safe: value comes from
+                // the server-rendered FONT_STACKS constant). Otherwise inject the regex-validated
+                // ID so unknown font names are still protected against CSS injection.
+                var fontStack = (window.FONT_STACKS && Object.prototype.hasOwnProperty.call(window.FONT_STACKS, savedFont))
+                    ? window.FONT_STACKS[savedFont]
+                    : savedFont;
                 contents.addStylesheetCss(
                     "* { font-family: " + fontStack + " !important; }",
                     "calibre-font-override"

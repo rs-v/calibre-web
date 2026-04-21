@@ -310,13 +310,23 @@
               });
               return;
           }
-          var fontStack = window.FONT_STACKS[id] || id;
+          // Use the hardcoded cross-platform stack when available (safe: value comes from
+          // the server-rendered FONT_STACKS constant above). Otherwise fall back to the
+          // regex-validated id so unknown font names are still protected against injection.
+          var fontStack = (window.FONT_STACKS && Object.prototype.hasOwnProperty.call(window.FONT_STACKS, id))
+              ? window.FONT_STACKS[id]
+              : id;
           reader.rendition.themes.font(fontStack);
           // Also apply to all child elements so epub-level font declarations are overridden.
-          // Only allow known safe font IDs to prevent CSS injection.
-          if (/^[A-Za-z0-9 _-]+$/.test(id)) {
+          if (Object.prototype.hasOwnProperty.call(window.FONT_STACKS || {}, id)) {
+              // FONT_STACKS value is a server-defined constant; safe to inject directly.
               reader.rendition.getContents().forEach(function(c) {
-                  c.addStylesheetCss("* { font-family: " + fontStack + " !important; }", "calibre-font-override");
+                  c.addStylesheetCss("* { font-family: " + window.FONT_STACKS[id] + " !important; }", "calibre-font-override");
+              });
+          } else if (/^[A-Za-z0-9 _-]+$/.test(id)) {
+              // Fallback for any unknown id: regex-validated before injection.
+              reader.rendition.getContents().forEach(function(c) {
+                  c.addStylesheetCss("* { font-family: " + id + " !important; }", "calibre-font-override");
               });
           }
       };
