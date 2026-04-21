@@ -16,7 +16,7 @@
 .slider label {
   font-size: 20px;
   font-weight: 400;
-  font-family: Open Sans;
+  font-family: Open Sans, "Noto Sans CJK SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", sans-serif;
   padding-right: 10px;
   color: white;
 }
@@ -31,7 +31,7 @@
 .item {
   font-size: 14px;
   font-weight: 600;
-  font-family: Open Sans;
+  font-family: Open Sans, "Noto Sans CJK SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", sans-serif;
   padding-right: 10px;
   color: white;
 }
