@@ -276,6 +276,18 @@
 
         let defaultFont;
 
+      // Cross-platform CSS font stacks for each font button.
+      // Each stack lists the Windows name first, then macOS/iOS equivalents,
+      // then Android (Noto) equivalents, then a generic fallback.
+      // This ensures the font-switching buttons work on all devices even when
+      // the primary font name is not installed.
+      window.FONT_STACKS = {
+          "Yahei":  '"Microsoft YaHei", "\u5fae\u8f6f\u96c5\u9ed1", "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Noto Sans SC", sans-serif',
+          "SimSun": '"SimSun", "\u5b8b\u4f53", "Noto Serif CJK SC", "Noto Serif SC", "PingFang SC", serif',
+          "KaiTi":  '"KaiTi", "\u6977\u4f53", "STKaiti", "Hiragino Mincho ProN", "Noto Serif CJK SC", serif',
+          "Arial":  '"Arial", Helvetica, sans-serif'
+      };
+
       window.selectFont = function (id) {
           if (!defaultFont) {
             defaultFont = reader.rendition.getContents()[0]?.css('font-family');
@@ -287,7 +299,7 @@
           }
           document.getElementById(id).querySelector("span").textContent = "✓";
 
-          // Save font selection to localStorage
+          // Save font selection to localStorage (store the ID, not the full stack)
           localStorage.setItem("calibre.reader.font", id);
 
           if (id == "default") {
@@ -298,12 +310,13 @@
               });
               return;
           }
-          reader.rendition.themes.font(id);
+          var fontStack = window.FONT_STACKS[id] || id;
+          reader.rendition.themes.font(fontStack);
           // Also apply to all child elements so epub-level font declarations are overridden.
           // Only allow known safe font IDs to prevent CSS injection.
           if (/^[A-Za-z0-9 _-]+$/.test(id)) {
               reader.rendition.getContents().forEach(function(c) {
-                  c.addStylesheetCss("* { font-family: " + id + " !important; }", "calibre-font-override");
+                  c.addStylesheetCss("* { font-family: " + fontStack + " !important; }", "calibre-font-override");
               });
           }
       };
